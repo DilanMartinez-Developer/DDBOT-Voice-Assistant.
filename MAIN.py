@@ -1,30 +1,43 @@
-from utilidades.escuchar import escuchar
+from UtilidadesConIA.iaGroq import pensar
+from UtilidadesConIA.ejecutorIA import ejecutarIA
+
+from utilidades.escucharNEW import escuchar
 from utilidades.hablar import hablar
-from utilidades.procesar import procesar
 import utilidades.Comandos as texts
 import time
+import keyboard
 
+def ActivacionPorTecla():
 
-while True:  
     texto = escuchar()
-    print("texto :",texto)
+
+    print("texto:", texto)
+
     if texto in texts.TY_WORDS:
-        hablar("Pa eso estamos mano")
+        hablar("pa eso estamos mano")
+        return
 
     if texto in texts.CLOSE_WORDS:
-        hablar("deteniendo programa, nos vemos luego")
+        hablar("deteniendo programa")
         time.sleep(0.2)
         exit()
 
-    if any(p in texto for p in texts.WAKE_WORDS):
-        #limpiar wake word para que no queden en los comandos
-        for palabra in texts.WAKE_WORDS:
-            if palabra in texto:
-                texto = texto.replace(palabra, "")
-                break
-        comando = texto.strip()
-        if comando != "":
-            procesar(comando)
-        else:
-            hablar("Que pasò ? ")
-                
+    comando = texto.strip()
+
+    if comando == "":
+        hablar("no logre escucharte bien")
+        return
+
+    print("pensando...")
+
+    respuestaIA = pensar(comando)
+
+    print(respuestaIA)
+
+    ejecutarIA(respuestaIA)
+
+
+
+keyboard.add_hotkey('F10',  ActivacionPorTecla)
+print("Esperando tecla...")
+keyboard.wait()

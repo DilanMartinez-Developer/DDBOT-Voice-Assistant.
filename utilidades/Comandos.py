@@ -22,7 +22,8 @@ CARPETAS_WORDS = {
     "carpet",
     "la carpeta", 
     "le carpeta", 
-    "l carpeta"
+    "l carpeta",
+    "abrir_carpeta"
 }
 
 TY_WORDS = [
@@ -43,9 +44,10 @@ CLOSE_WORDS = [
     "detener ai", 
     "chau didi bot", 
     "nos vemos",
-    "clóset program"]
+    "clóset program",
+    "cerrar_aplicacion"]
 
-CARPETAS_WORDS = {
+CARPETAS_ROOTS = {
     "descargas": "Downloads",
     "documentos": "Documents",
     "escritorio": "Desktop",
@@ -65,7 +67,8 @@ OPEN_WORDS = {
     "open",
     "ejecuta",
     "inicia",
-    "run"
+    "run",
+    "abrir_aplicacion"
 }
 
 #Rutas Para abrir cosas
@@ -86,7 +89,8 @@ BUSCAR_WORDS = {
 GOOGLE_KEYS = { 
     "internet",
     "en google", 
-    "en internet"
+    "en internet",
+    "buscar_google"
     }
 
 YOUTUBE_KEYS = { 
@@ -96,7 +100,8 @@ YOUTUBE_KEYS = {
     "video",
     "videos",
     "el video", 
-    "en Yutub"
+    "en Yutub",
+    "buscar_youtube"
     }
 
 

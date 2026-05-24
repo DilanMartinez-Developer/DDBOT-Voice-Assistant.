@@ -8,7 +8,6 @@ from datetime import datetime
 import time
 
 def procesar(comando):                  
-    comandoSplit = comando.split()
     #nueva rutina
     if any(p in comando for p in Comandos.NEWRUTINA_WORDS):
         for p in Comandos.NEWRUTINA_WORDS:
