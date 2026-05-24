@@ -60,7 +60,6 @@ def escuchar():
         steam discord youtube github windows python spotify entre otras en ingles
         """
     )
-    print(info.language, info.language_probability)
     texto = ""
 
     for segment in segments:

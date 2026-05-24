@@ -1,17 +1,19 @@
 from utilidades.hablar import hablar
-import utilidades.Comandos as texts
-import subprocess
-import webbrowser
+from UtilidadesConIA.herramientas import TOOLS
+
+
 def ejecutarIA(respuesta):
 
-    tipo = respuesta.get("tipo")
+    tipo = respuesta.get(
+        "tipo"
+    )
 
     if tipo == "respuesta":
 
         hablar(
             respuesta.get(
                 "contenido",
-                "No tengo respuesta"
+                "no tengo respuesta"
             )
         )
         return
@@ -42,56 +44,33 @@ def ejecutarIA(respuesta):
                 parametro
             )
 
-            if accion == "abrir_aplicacion":
+            if accion in TOOLS:
 
-                if parametro in texts.OPEN_ROOTS:
+               if accion == "activar_ventana":
 
-                    hablar(
-                        "abriendo " + parametro
-                    )
+                   ok = TOOLS[
+                       accion
+                   ](
+                       parametro
+                   )
 
-                    texts.OPEN_ROOTS[parametro]()
+                   if not ok and parametro in TOOLS:
+                        TOOLS["abrir_aplicacion"](parametro)
 
-                else:
+               else:
 
-                    hablar(
-                        "no conozco " + parametro
-                    )
-              
-            elif accion == "buscar_google":
-                hablar(
-                    "Buscando " + parametro + " en google"
-                )
-                webbrowser.open("https://www.google.com/search?q=" + parametro)
-            
-            elif accion == "buscar_youtube":
-                hablar(
-                    "abriendo " + parametro +" en youtube"
-                )
-                webbrowser.open("https://www.youtube.com/results?search_query=" + parametro)           
+                   TOOLS[
+                       accion
+                   ](
+                       parametro
+                   )
 
-            elif accion == "abrir_carpeta":
-                if parametro in texts.CARPETAS_ROOTS:
-                    hablar(
-                        "abriendo la carpeta " + parametro
-                    )
-
-                    ruta = "C:\\Users\\galos\\" + texts.CARPETAS_ROOTS[parametro]
-
-                    subprocess.run(["cmd", "/c", "start", "",ruta])
-
-                else:
-
-                    hablar(
-                        "no conozco " + parametro
-                    )
-
-            elif accion == "cerrar_IA":
-                exit
             else:
+
                 hablar(
-                    "No se que accion es esa"
-                ) 
-                print(accion)
-            
-    
+                    "accion desconocida"
+                )
+
+                print(
+                    accion
+                )

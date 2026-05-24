@@ -7,6 +7,12 @@ import utilidades.Comandos as texts
 import time
 import keyboard
 
+CONTEXTO_IA = {
+    "ultima_respuesta": "",
+    "ultimo_comando": "",
+    "ultima_accion": ""
+}
+
 def ActivacionPorTecla():
 
     texto = escuchar()
@@ -30,8 +36,17 @@ def ActivacionPorTecla():
 
     print("pensando...")
 
-    respuestaIA = pensar(comando)
+    respuestaIA = pensar(comando, CONTEXTO_IA)
 
+    if respuestaIA["tipo"] == "respuesta":
+        CONTEXTO_IA["ultima_respuesta"] = respuestaIA["contenido"]
+
+    if respuestaIA["tipo"] == "acciones":
+        CONTEXTO_IA["ultima_accion"] = str(
+        respuestaIA["acciones"]
+    )
+    CONTEXTO_IA["ultimo_comando"] = comando
+    
     print(respuestaIA)
 
     ejecutarIA(respuestaIA)
