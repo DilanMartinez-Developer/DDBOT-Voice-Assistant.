@@ -1,4 +1,4 @@
-from UtilidadesConIA.iaGroq import pensar
+from UtilidadesConIA.iaLocal import pensar
 from UtilidadesConIA.ejecutorIA import ejecutarIA
 
 from utilidades.escuchar import escuchar

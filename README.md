@@ -1,27 +1,27 @@
 # DDBOT - AI Powered Voice Assistant
-### Asistente de Voz Autónomo y Modular para Windows
+### Asistente de Voz Autónomo, Modular e Híbrido (Local / Nube) para Windows
 
 <p align="center">
   <img src="docs/ddbot-banner.png" alt="DDBOT Banner" width="100%">
 </p>
 
 ## 📝 Descripción
-DDBOT es un asistente de voz avanzado desarrollado en Python que combina el procesamiento de lenguaje natural en la nube con automatización local y una arquitectura modular basada en plugins. 
+DDBOT es un asistente de voz avanzado desarrollado en Python que combina automatización local y una arquitectura modular basada en plugins con un **motor de procesamiento dual**. Puede operar de manera 100% privada y local utilizando **Ollama** o de forma ultraveloz en la nube mediante **Groq**.
 
-El sistema utiliza un flujo optimizado: captura audio mediante control de actividad de voz (VAD), transcribe de forma local y ultrarrápida con **Faster-Whisper**, procesa e interpreta la intención del usuario a través de los LLMs de **Groq** devolviendo un plan estructurado en **JSON**, y finalmente ejecuta secuencias lógicas e independientes a bajo nivel en el sistema operativo.
+El sistema utiliza un flujo optimizado: captura audio mediante control de actividad de voz (VAD), transcribe de forma local con **Faster-Whisper**, procesa la intención del usuario a través de un LLM devolviendo un plan estructurado en **JSON**, y finalmente ejecuta secuencias lógicas e independientes a bajo nivel en el sistema operativo.
 
 El objetivo principal es explorar el desarrollo de **Agentes Autónomos Resolutivos** capaces de encadenar acciones complejas y expandir sus habilidades dinámicamente.
 
 ---
 
 ## 🚀 Características Clave
+* **Procesamiento Dual Híbrido:** Soporte nativo para Inteligencia Artificial en la nube (Groq) o local sin internet (Ollama).
 * **Escucha Activa con VAD (Voice Activity Detection):** Detección automática de silencio para cortar la grabación de forma inteligente cuando terminas de hablar.
-* **Cerebro con LLM Avanzado:** Respuestas estructuradas nativas en formato JSON mediante Groq (Llama 3.3).
+* **Cerebro con Modelos de Visión:** Capacidad de sacar capturas de pantalla instantáneas y "ver" interfaces de usuario, explicar memes o auditar errores de código en tiempo real.
 * **Planificación Multi-Acción Autónoma:** Capacidad de la IA para razonar y encadenar múltiples comandos secuenciales en una sola petición (ej. activar ventana, esperar, escribir y ejecutar combo).
 * **Arquitectura de Plugins Modulares:** Sistema desacoplado que inyecta dinámicamente herramientas y reglas al prompt del sistema sin tocar el núcleo del código.
 * **Feedback Auditivo Integral:** Tonos de notificación (*beeps*) nativos del sistema para estados de escucha y procesamiento.
 * **Freno de Emergencia (Kill Switch):** Comando físico por teclado (`Ctrl+Shift+F10`) para detener procesos descontrolados instantáneamente.
-* **Automatización de Escritorio Humanoide:** Escritura con intervalos, manejo tolerante de títulos de ventana (*fuzzy matching*) y emulación de periféricos.
 
 ---
 
@@ -40,7 +40,9 @@ El objetivo principal es explorar el desarrollo de **Agentes Autónomos Resoluti
      Texto Limpio
           │
           ▼
-     Groq (LLM) ◄─── [Inyección Dinámica de Plugins / Reglas]
+   CEREBRO SELECCIONABLE ◄─── [Inyección Dinámica de Plugins / Reglas]
+     ├──► MODO LOCAL: Ollama (Llama 3.3 / LLaVA)
+     └──► MODO NUBE:  Groq Cloud (Llama 3.3 / LLaVA-Preview)
           │
           ▼
   JSON Plan de Acciones (Multi-acción / Auto-parámetros)
@@ -48,7 +50,7 @@ El objetivo principal es explorar el desarrollo de **Agentes Autónomos Resoluti
           ▼
     Ejecutor Central
           │
-          ├──► Plugins Internos (broma, volumen_manager, notas_manager)
+          ├──► Plugins Internos (broma, volumen_manager, notas_manager, vision_manager)
           └──► Herramientas de Sistema (PyAutoGUI, PyGetWindow, Teclado)
           │
           ▼
@@ -67,15 +69,18 @@ DDBOT/
 │   └── Comandos.py         # Diccionarios de palabras clave y rutas fijas
 │
 ├── UtilidadesConIA/        # Lógica de Inteligencia Artificial
-│   ├── iaGroq.py           # Conector con la API de Groq y estructurador JSON
+│   ├── iaLocal.py          # NUEVO: Conector por defecto 100% Local (Ollama)
+│   ├── iaGroq_onlineMode.py# Alternativa: Conector en la nube mediante API de Groq
 │   ├── ejecutorIA.py       # Orquestador tolerante a fallos del plan de acción
 │   └── herramientas.py     # Diccionario base TOOLS (ventanas, teclas, mouse)
 │
-├── plugins/                # ¡NUEVO! Sistema Modular de Plugins Autónomos
+├── plugins/                # Sistema Modular de Plugins Autónomos
+│   ├── vision_manager.py   # ¡NUEVO! Ojos para el bot (Captura de pantalla + Análisis Visual)
 │   ├── volumen_manager.py  # Control del mezclador de volumen de Windows (PyCaw)
 │   ├── notas_manager.py    # Gestor de notas temporales con análisis de horario (Regex)
 │   └── broma.py            # Módulo de entretenimiento
 │
+├── capturas/               # Almacenamiento local temporal de imágenes (Ignorado en Git)
 ├── docs/
 │   └── ddbot-banner.png    # Recursos visuales del repositorio
 │
@@ -96,20 +101,10 @@ JSON
     { "accion": "tecla_combo", "parametros": "alt+f4" }
   ]
 }
-2. Extracción de Datos en Plugins con Parámetros Automáticos
-Usuario: "Dime cuánto falta desde que publiqué esta nota para dominar el mundo"
+2. Visión Computacional Orientada a Contexto
+Usuario: "Dime qué ves en mi pantalla"
 
-Ejecución Multi-Acción en Cadena:
-
-El bot detecta que requiere el plugin notas_manager.
-
-Ejecuta buscar_fecha_nota para obtener la fecha de publicación original.
-
-Al detectar una consulta de tiempo relativo, pasa automáticamente el parámetro "auto" a calcular_tiempo_restante.
-
-El script lee el texto interno de la nota ("debo dominar el mundo a las 5 p.m."), extrae la hora militar (17:00) mediante expresiones regulares (re) y procesa la matemática de tiempos frente a la hora de publicación original (03:35).
-
-Salida por voz: "Faltan exactamente 13 horas y 25 minutos para las 17:00 desde la hora de publicación."
+Ejecución de la Acción: El asistente ejecuta analizar_pantalla. Python toma una captura de la interfaz actual, se la envía al modelo multimodal (llava o llama-vision) y describe de manera conversacional ventanas activas, errores de sintaxis en editores de código o imágenes en pantalla.
 
 🔧 Instalación y Configuración
 Clonar el repositorio:
@@ -118,13 +113,26 @@ Bash
 git clone [https://github.com/DilanMartinez-Developer/DDBOT.git](https://github.com/DilanMartinez-Developer/DDBOT.git)
 cd DDBOT
 Instalar dependencias necesarias:
-(Asegúrate de tener instaladas las librerías de audio nativas de Windows para el control de volumen)
 
 Bash
 pip install -r requirements.txt
-pip install pycaw comtypes
-Configurar variables de entorno:
-Crea un archivo .env en la raíz del proyecto y añade tu API Key de Groq:
+pip install pycaw comtypes ollama Pillow
+Configurar el Modo de Inteligencia Artificial:
+
+A) Modo Local (Por Defecto):
+
+Descarga e instala Ollama.
+
+Descarga los modelos de texto y visión ejecutando en tu consola:
+
+Bash
+ollama run llama3.3
+ollama run llava
+B) Modo Nube (Groq):
+
+Si prefieres máxima velocidad sin consumir recursos de tu PC, configura el archivo iaGroq_onlineMode.py en tu núcleo de procesamiento.
+
+Crea un archivo .env en la raíz del proyecto y añade tu API Key:
 
 Fragmento de código
 Groq_Api_KEY=TU_API_KEY_DE_GROQ
@@ -137,22 +145,22 @@ Presiona F10 para empezar a hablar o Ctrl+Shift+F10 en cualquier momento para el
 🗺️ Roadmap de Desarrollo
 [x] Reconocimiento de voz local y optimización de audio (VAD)
 
-[x] Integración con Groq Cloud LLM
+[x] Integración con Groq Cloud LLM e IA Híbrida Local (Ollama)
 
 [x] Sistema de automatización de ventanas y emulación de teclado
 
 [x] Contexto conversacional y memoria de acciones
 
-[x] Arquitectura Modular por Sistema de Plugins (¡Logrado!)
+[x] Arquitectura Modular por Sistema de Plugins
 
-[ ] Plugin de Visión Avanzada: Capturas de pantalla ocultas y análisis visual del escritorio con modelos de visión (Próximamente)
+[x] Plugin de Visión Integrado (¡Logrado!)
 
 [ ] Implementación de OCR en pantalla para clics dinámicos sobre texto
 
 [ ] Interfaz gráfica de usuario (GUI) interactiva
 
 🎓 Objetivo Educativo
-Este proyecto es un entorno de experimentación personal diseñado para profundizar en la integración práctica de Inteligencia Artificial Generativa con automatización nativa de sistemas operativos, procesamiento de señal de voz y desarrollo de herramientas asistidas por IA.
+Este proyecto es un entorno de experimentación personal diseñado para profundizar en la integración práctica de Inteligencia Artificial Generativa con automatización nativa de sistemas operativos, procesamiento de señal de voz y desarrollo de agentes autónomos.
 
 👤 Autor
 Dilan Martínez - Estudiante de Ingeniería en Mecatrónica.
