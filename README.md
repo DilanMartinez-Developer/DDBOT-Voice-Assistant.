@@ -150,7 +150,7 @@ python MAIN.py
 Presiona F10 para empezar a hablar o Ctrl+Shift+F10 en cualquier momento para el apagado de emergencia.
 ```
 
-##🗺️ Roadmap de Desarrollo
+## 🗺️ Roadmap de Desarrollo
 ```
 [x] Reconocimiento de voz local y optimización de audio (VAD)
 
@@ -169,10 +169,9 @@ Presiona F10 para empezar a hablar o Ctrl+Shift+F10 en cualquier momento para el
 [ ] Interfaz gráfica de usuario (GUI) interactiva
 ```
 
-##🎓 Objetivo Educativo
-```
+## 🎓 Objetivo Educativo
 Este proyecto es un entorno de experimentación personal diseñado para profundizar en la integración práctica de Inteligencia Artificial Generativa con automatización nativa de sistemas operativos, procesamiento de señal de voz y desarrollo de agentes autónomos.
-```
+
 
 👤 Autor
 Dilan Martínez - Estudiante de Ingeniería en Mecatrónica.
