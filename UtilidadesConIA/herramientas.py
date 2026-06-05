@@ -1,11 +1,13 @@
 import webbrowser
 import subprocess
+import os
 from utilidades.hablar import hablar
 import utilidades.Comandos as texts
-#masnos para el asist
 import pyautogui
 import pygetwindow as gw
 import time
+import pyperclip
+from utilidades.gestor_plugins import obtener_plugins
 
 def abrir_aplicacion(parametro):
 
@@ -53,14 +55,21 @@ def abrir_carpeta(parametro):
             "abriendo la carpeta " + parametro
         )
 
-        ruta = (
-            "C:\\Users\\galos\\"
-            + texts.CARPETAS_ROOTS[parametro]
+        # Detecta automáticamente "C:\Users\tu_usuario"
+        usuario_root = os.path.expanduser("~")
+
+        ruta = os.path.join(
+            usuario_root, 
+            texts.CARPETAS_ROOTS[parametro]
         )
 
-        subprocess.run(
-            ["cmd", "/c", "start", "", ruta]
-        )
+        try:
+            subprocess.run(
+                ["cmd", "/c", "start", "", ruta]
+            )
+        except Exception as e:
+            print(f"Error de sistema: {e}")
+            hablar("Hubo un problema al abrir esa ruta")
 
     else:
 
@@ -80,48 +89,44 @@ def escribir(parametro):
 
 
 def presionar_tecla(parametro):
-
-    pyautogui.press(
-        parametro
-    )
+    try:
+        pyautogui.press(
+            parametro
+        )
+    except Exception as e:
+        print(f"Tecla no válida: {e}")
 
 
 def tecla_combo(parametro):
+    try:
+        teclas = parametro.split("+")
 
-    teclas = parametro.split("+")
-
-    pyautogui.hotkey(
-        *teclas
-    )
+        pyautogui.hotkey(
+            *teclas
+        )
+    except Exception as e:
+        print(f"Combo no válido: {e}")
 
 
 def activar_ventana(parametro):
-
-    ventanas = gw.getWindowsWithTitle(
-        parametro
-    )
-
-    if ventanas:
-
-        try:
-
-            ventana = ventanas[0]
-
-            if ventana.isMinimized:
-                ventana.restore()
-
-            ventana.activate()
-
-            print(
-                "ventana activada"
-            )
-
-            return True
-
-        except:
-
-            return False
-
+    todas_las_ventanas = gw.getAllTitles()
+    
+    # Buscamos coincidencias ignorando mayúsculas
+    for titulo in todas_las_ventanas:
+        if parametro.lower() in titulo.lower() and titulo.strip() != "":
+            ventanas = gw.getWindowsWithTitle(titulo)
+            if ventanas:
+                try:
+                    ventana = ventanas[0]
+                    if ventana.isMinimized:
+                        ventana.restore()
+                    ventana.activate()
+                    print(f"Ventana activada: {titulo}")
+                    return True
+                except:
+                    continue
+                    
+    print(f"No se encontró ninguna ventana con: {parametro}")
     return False
 
 
@@ -132,18 +137,29 @@ def esperar(parametro):
     )
 
 
+def buscar_portapapeles(parametro):
+    texto_copiado = pyperclip.paste()
+    if texto_copiado:
+        hablar("Buscando lo que copiaste")
+        webbrowser.open("https://www.google.com/search?q=" + texto_copiado)
+    else:
+        hablar("El portapapeles está vacío")
+
 
 TOOLS = {
-    #comandos basicos
+    # comandos basicos
     "abrir_aplicacion": abrir_aplicacion,
     "buscar_google": buscar_google,
     "buscar_youtube": buscar_youtube,
     "abrir_carpeta": abrir_carpeta,
-    #manos
+    # manos
     "escribir": escribir,
     "tecla_combo": tecla_combo,
     "presionar_tecla": presionar_tecla,
     "activar_ventana": activar_ventana,
-    
     "esperar": esperar
 }
+
+# Inyectar dinámicamente las herramientas de los plugins
+tools_extras, _ = obtener_plugins()
+TOOLS.update(tools_extras)

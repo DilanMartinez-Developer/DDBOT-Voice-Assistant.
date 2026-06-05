@@ -2,6 +2,7 @@ import os
 import json
 from groq import Groq
 from dotenv import load_dotenv
+from utilidades.gestor_plugins import obtener_plugins
 #cargo las variables .env
 load_dotenv()
 
@@ -50,6 +51,9 @@ Acciones permitidas:
 - activar_ventana
 - esperar
 - tecla_combo
+- buscar_portapapeles
+
+[ESPACIO_PARA_PLUGINS]
 
 Reglas importantes:
 
@@ -79,6 +83,7 @@ Reglas importantes:
     "la busqueda anterior"
     "esa ventana"
     interpreta que habla del contexto previo.
+- si el usuario pide buscar lo copiado o el portapapeles, usa buscar_portapapeles
 
 Ejemplos:
 
@@ -242,41 +247,38 @@ Usuario: vuelve a esa ventana
 }
 """
 
-def pensar(texto, contexto=None):
+def pensar(historial):
+    # --- MAGIA DE PLUGINS AQUÍ ---
+    _, reglas_extras = obtener_plugins()
+    prompt_dinamico = SYSTEM_PROMPT.replace("[ESPACIO_PARA_PLUGINS]", reglas_extras)
+    # -----------------------------
 
-    contexto_txt = ""
+    # Construimos la lista final de mensajes. 
+    # El sistema siempre va PRIMERO con las reglas frescas, seguido de la charla.
+    mensajes_para_groq = [
+        {"role": "system", "content": prompt_dinamico}
+    ]
+    
+    # Le sumamos el historial que nos manda el MAIN
+    mensajes_para_groq.extend(historial)
 
-    if contexto:
-
-        contexto_txt = f"""
-            ultima respuesta:
-            {contexto.get("ultima_respuesta","")}
-
-            ultimo comando:
-            {contexto.get("ultimo_comando","")}
-
-            ultima accion:
-            {contexto.get("ultima_accion","")}
-            """
-
+    # Llamada a Groq
     respuesta = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        messages=[
-            {
-                "role":"system",
-                "content": SYSTEM_PROMPT
-            },
-            {
-                "role":"system",
-                "content": contexto_txt
-            },
-            {
-                "role":"user",
-                "content": texto
-            }
-        ],
-        temperature=0.2
+        messages=mensajes_para_groq,
+        temperature=0.2,
+        response_format={"type": "json_object"} # Obliga a Groq a devolver un JSON válido
     )
+
+    contenido = respuesta.choices[0].message.content
+
+    try:
+        return json.loads(contenido)
+    except:
+        return {
+            "tipo":"respuesta",
+            "contenido":contenido
+        }
 
     contenido = respuesta.choices[0].message.content
 

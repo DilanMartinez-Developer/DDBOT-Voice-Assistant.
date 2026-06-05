@@ -1,7 +1,6 @@
 from utilidades.hablar import hablar
 from UtilidadesConIA.herramientas import TOOLS
 
-
 def ejecutarIA(respuesta):
 
     tipo = respuesta.get(
@@ -16,6 +15,7 @@ def ejecutarIA(respuesta):
                 "no tengo respuesta"
             )
         )
+        print("la respuesta fue",respuesta)
         return
 
     if tipo == "acciones":
@@ -24,7 +24,7 @@ def ejecutarIA(respuesta):
             "acciones",
             []
         )
-
+        print("json : ",acciones)
         for item in acciones:
 
             accion = item.get(
@@ -40,30 +40,34 @@ def ejecutarIA(respuesta):
             ).lower()
 
             print(
-                accion,
-                parametro
+                "Ejecutando:", accion, "| Parametro:", parametro
             )
 
             if accion in TOOLS:
+                
+                try:
+                    if accion == "activar_ventana":
 
-               if accion == "activar_ventana":
+                        ok = TOOLS[
+                            accion
+                        ](
+                            parametro
+                        )
 
-                   ok = TOOLS[
-                       accion
-                   ](
-                       parametro
-                   )
+                        if not ok and parametro in TOOLS:
+                            TOOLS["abrir_aplicacion"](parametro)
 
-                   if not ok and parametro in TOOLS:
-                        TOOLS["abrir_aplicacion"](parametro)
+                    else:
 
-               else:
-
-                   TOOLS[
-                       accion
-                   ](
-                       parametro
-                   )
+                        TOOLS[
+                            accion
+                        ](
+                            parametro
+                        )
+                        
+                except Exception as e:
+                    print(f"Error crítico en la herramienta '{accion}': {e}")
+                    hablar("Ups, algo falló al ejecutar esa acción")
 
             else:
 
@@ -72,5 +76,5 @@ def ejecutarIA(respuesta):
                 )
 
                 print(
-                    accion
+                    "No mapeado:", accion
                 )

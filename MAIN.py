@@ -1,11 +1,16 @@
 from UtilidadesConIA.iaGroq import pensar
 from UtilidadesConIA.ejecutorIA import ejecutarIA
 
-from utilidades.escucharNEW import escuchar
+from utilidades.escuchar import escuchar
 from utilidades.hablar import hablar
 import utilidades.Comandos as texts
 import time
 import keyboard
+import os
+import json
+
+historial_conversacion = []
+MAX_MEMORIA = 12
 
 CONTEXTO_IA = {
     "ultima_respuesta": "",
@@ -14,7 +19,7 @@ CONTEXTO_IA = {
 }
 
 def ActivacionPorTecla():
-
+    global historial_conversacion
     texto = escuchar()
 
     print("texto:", texto)
@@ -22,11 +27,6 @@ def ActivacionPorTecla():
     if texto in texts.TY_WORDS:
         hablar("pa eso estamos mano")
         return
-
-    if texto in texts.CLOSE_WORDS:
-        hablar("deteniendo programa")
-        time.sleep(0.2)
-        exit()
 
     comando = texto.strip()
 
@@ -36,23 +36,35 @@ def ActivacionPorTecla():
 
     print("pensando...")
 
-    respuestaIA = pensar(comando, CONTEXTO_IA)
+    if texto:
+        print(f"Usuario: {texto}")
 
-    if respuestaIA["tipo"] == "respuesta":
-        CONTEXTO_IA["ultima_respuesta"] = respuestaIA["contenido"]
+        # 1. Agregamos lo que dijo el usuario al historial
+        historial_conversacion.append({"role": "user", "content": texto})
 
-    if respuestaIA["tipo"] == "acciones":
-        CONTEXTO_IA["ultima_accion"] = str(
-        respuestaIA["acciones"]
-    )
-    CONTEXTO_IA["ultimo_comando"] = comando
-    
-    print(respuestaIA)
+        # 2. Recortamos el historial si se hace muy largo (para ahorrar tokens)
+        if len(historial_conversacion) > MAX_MEMORIA:
+            # Nos quedamos solo con los últimos mensajes
+            historial_conversacion = historial_conversacion[-MAX_MEMORIA:]
 
-    ejecutarIA(respuestaIA)
+        # 3. Llamamos a Groq, pasándole TODA la lista
+        respuestaIA = pensar(historial_conversacion)
 
+        # 4. Agregamos la respuesta del bot al historial (para que recuerde lo que hizo)
+        # Lo guardamos como texto JSON puro
+        historial_conversacion.append({"role": "assistant", "content": json.dumps(respuestaIA)})
 
+        # 5. Ejecutamos la acción como siempre
+        ejecutarIA(respuestaIA)
+    else:
+        print("no logre escuchar nada")
 
+def abortarMision():
+    print("¡ABORTANDO!")
+    os._exit(0)
+
+keyboard.add_hotkey('ctrl+shift+f10', abortarMision)
 keyboard.add_hotkey('F10',  ActivacionPorTecla)
+
 print("Esperando tecla...")
 keyboard.wait()
