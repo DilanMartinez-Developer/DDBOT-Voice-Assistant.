@@ -25,6 +25,7 @@ El objetivo principal es explorar el desarrollo de **Agentes Autónomos Resoluti
 
 ---
 
+
 ## 🛠️ Arquitectura del Sistema
 
 ```text
@@ -55,7 +56,9 @@ El objetivo principal es explorar el desarrollo de **Agentes Autónomos Resoluti
           │
           ▼
    Acción Ejecutada en Windows
-📂 Estructura del Proyecto
+```
+## 📂 Estructura del Proyecto
+```
 Plaintext
 DDBOT/
 │
@@ -86,7 +89,9 @@ DDBOT/
 │
 ├── requirements.txt        # Dependencias del entorno
 └── README.md
-⌨️ Ejemplos de Razonamiento Autónomo
+```
+## ⌨️ Ejemplos de Razonamiento Autónomo
+```
 1. Encadenamiento Secuencial Complejo
 Usuario: "Abre steam espera tres segundos y pulsa alt mas f4"
 
@@ -105,8 +110,10 @@ JSON
 Usuario: "Dime qué ves en mi pantalla"
 
 Ejecución de la Acción: El asistente ejecuta analizar_pantalla. Python toma una captura de la interfaz actual, se la envía al modelo multimodal (llava o llama-vision) y describe de manera conversacional ventanas activas, errores de sintaxis en editores de código o imágenes en pantalla.
+```
 
-🔧 Instalación y Configuración
+## 🔧 Instalación y Configuración
+
 Clonar el repositorio:
 
 Bash
